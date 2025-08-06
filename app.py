@@ -72,17 +72,17 @@ with tabs[1]:
         st.session_state.trades.append(trade)
         st.success("Trade added successfully!")
 
-    trade_df = pd.DataFrame(st.session_state.trades)
-    if not trade_df.empty:
-        st.dataframe(trade_df)
-        st.download_button("📥 Download Trades", trade_df.to_csv(index=False), file_name="paper_trades.csv")
+    if st.session_state.trades:
+        for i, trade in enumerate(st.session_state.trades):
+            with st.expander(f"🧾 {trade['Stock']} | {trade['Date']} | Entry: {trade['Entry']}, SL: {trade['SL']}, Target: {trade['Target']}"):
+                st.write(trade)
+                if st.button(f"❌ Delete Trade #{i}"):
+                    deleted = st.session_state.trades.pop(i)
+                    st.success(f"Deleted trade: {deleted['Stock']} on {deleted['Date']}")
+                    st.experimental_rerun()
 
-        # Option to delete trade
-        st.markdown("### ❌ Delete a Trade")
-        delete_index = st.number_input("Enter the index of the trade to delete", min_value=0, max_value=len(st.session_state.trades)-1, step=1)
-        if st.button("Delete Trade"):
-            deleted = st.session_state.trades.pop(delete_index)
-            st.success(f"Deleted trade: {deleted['Stock']} on {deleted['Date']}")
+        trade_df = pd.DataFrame(st.session_state.trades)
+        st.download_button("📥 Download Trades", trade_df.to_csv(index=False), file_name="paper_trades.csv")
 
 # --- TAB 3: Learning Zone ---
 with tabs[2]:
