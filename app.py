@@ -2,10 +2,25 @@ import streamlit as st
 import pandas as pd
 import yfinance as yf
 import datetime
+import os
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="Paper Trading Dashboard", layout="wide")
 st.title("📈 Paper Trading + Stock Screening + Learning")
+
+TRADES_CSV = "paper_trades.csv"
+
+# --- Load trades from CSV ---
+def load_trades():
+    if os.path.exists(TRADES_CSV):
+        df = pd.read_csv(TRADES_CSV)
+        df["Date"] = pd.to_datetime(df["Date"]).dt.date
+        return df
+    return pd.DataFrame(columns=["Date", "Stock", "Entry", "Qty", "SL", "Target", "Notes"])
+
+# --- Save trades to CSV ---
+def save_trades(df):
+    df.to_csv(TRADES_CSV, index=False)
 
 # --- SIDEBAR: USER INPUT ---
 st.sidebar.header("🔍 Stock Screener")
@@ -38,8 +53,7 @@ with tabs[0]:
 # --- TAB 2: Paper Trading Journal ---
 with tabs[1]:
     st.subheader("💼 Paper Trading Journal")
-    if "trades" not in st.session_state:
-        st.session_state.trades = []
+    trades_df = load_trades()
 
     with st.form("paper_trade_form"):
         col1, col2, col3 = st.columns(3)
@@ -60,7 +74,7 @@ with tabs[1]:
         submit = st.form_submit_button("Add Trade")
 
     if submit:
-        trade = {
+        new_trade = pd.DataFrame([{
             "Date": datetime.date.today(),
             "Stock": trade_stock,
             "Entry": entry_price,
@@ -68,21 +82,24 @@ with tabs[1]:
             "SL": stop_loss,
             "Target": target,
             "Notes": notes
-        }
-        st.session_state.trades.append(trade)
+        }])
+        trades_df = pd.concat([trades_df, new_trade], ignore_index=True)
+        save_trades(trades_df)
         st.success("Trade added successfully!")
+        st.experimental_rerun()
 
-    if st.session_state.trades:
-        for i, trade in enumerate(st.session_state.trades):
+    if not trades_df.empty:
+        for i, trade in trades_df.iterrows():
             with st.expander(f"🧾 {trade['Stock']} | {trade['Date']} | Entry: {trade['Entry']}, SL: {trade['SL']}, Target: {trade['Target']}"):
-                st.write(trade)
-                if st.button(f"❌ Delete Trade #{i}"):
-                    deleted = st.session_state.trades.pop(i)
-                    st.success(f"Deleted trade: {deleted['Stock']} on {deleted['Date']}")
+                st.write(trade.to_dict())
+                delete_button = st.button(f"❌ Delete Trade #{i}")
+                if delete_button:
+                    trades_df = trades_df.drop(i).reset_index(drop=True)
+                    save_trades(trades_df)
+                    st.success(f"Deleted trade: {trade['Stock']} on {trade['Date']}")
                     st.experimental_rerun()
 
-        trade_df = pd.DataFrame(st.session_state.trades)
-        st.download_button("📥 Download Trades", trade_df.to_csv(index=False), file_name="paper_trades.csv")
+        st.download_button("📥 Download Trades", trades_df.to_csv(index=False), file_name="paper_trades.csv")
 
 # --- TAB 3: Learning Zone ---
 with tabs[2]:
