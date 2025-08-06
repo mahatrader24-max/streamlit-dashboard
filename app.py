@@ -21,7 +21,7 @@ def fetch_data(symbol):
     return yf.download(symbol, start=start_date, end=end_date)
 
 # --- TABS ---
-tabs = st.tabs(["🧾 Screener", "💼 Paper Trading", "📚 Learning Zone"])
+tabs = st.tabs(["🧾 Screener", "💼 Paper Trading", "📚 Learning Zone", "🗓️ Learning Plan"])
 
 # --- TAB 1: Screener ---
 with tabs[0]:
@@ -87,3 +87,40 @@ with tabs[2]:
     - 🎥 [The Financial Analyst (YouTube)](https://www.youtube.com/@thefinancialanalyst)
     - 📊 [Chartink Screener](https://chartink.com/screener/)
     """)
+
+# --- TAB 4: Learning Plan ---
+with tabs[3]:
+    st.subheader("🗓️ Monthly Learning Plan (Aug–Dec 2025)")
+
+    learning_plan = {
+        "August": [
+            "Price action basics (support, resistance, trend, VRZ)",
+            "Learn TradingView tools (multi-timeframe use)",
+            "Study BOL, BOF, BOS from your strategy",
+            "Chart reading practice on Nifty 100"
+        ],
+        "September": [
+            "Paper trade 5 setups (BOF/BOL)",
+            "Learn risk:reward (1:2 minimum)",
+            "Create your own checklist",
+            "Start journaling entries in Excel sheet"
+        ],
+        "October": [
+            "Backtest 50–100 historical setups (TradingView replay mode)",
+            "Refine entry/exit logic, confirm performance stats"
+        ],
+        "November": [
+            "Trade with small capital ₹25K–₹50K",
+            "Run weekly review (P&L, mistakes, learnings)"
+        ],
+        "December": [
+            "Finalize strategy, VRZ indicator, capital plan",
+            "Set Jan 2026 trade launch goals",
+            "Prepare 1-year growth tracking Excel"
+        ]
+    }
+
+    for month, tasks in learning_plan.items():
+        st.markdown(f"### {month}")
+        for task in tasks:
+            st.markdown(f"- {task}")
