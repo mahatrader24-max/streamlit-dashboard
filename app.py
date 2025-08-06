@@ -77,6 +77,13 @@ with tabs[1]:
         st.dataframe(trade_df)
         st.download_button("📥 Download Trades", trade_df.to_csv(index=False), file_name="paper_trades.csv")
 
+        # Option to delete trade
+        st.markdown("### ❌ Delete a Trade")
+        delete_index = st.number_input("Enter the index of the trade to delete", min_value=0, max_value=len(st.session_state.trades)-1, step=1)
+        if st.button("Delete Trade"):
+            deleted = st.session_state.trades.pop(delete_index)
+            st.success(f"Deleted trade: {deleted['Stock']} on {deleted['Date']}")
+
 # --- TAB 3: Learning Zone ---
 with tabs[2]:
     st.subheader("📚 Learning Resources")
